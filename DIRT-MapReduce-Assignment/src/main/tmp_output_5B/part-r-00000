@@ -1,0 +1,7 @@
+X caus Y	X result in Y	X	1.0
+X caus Y	X result in Y	Y	1.0
+X die of Y	X kill Y	X	1.0
+X die of Y	X kill Y	Y	1.0
+X expos to Y	X protect from Y	Y	1.0
+X indic Y	X manifest by Y	X	1.0
+X indic Y	X manifest by Y	Y	0.9999999999999999

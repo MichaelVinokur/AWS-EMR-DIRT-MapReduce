@@ -1,0 +1,36 @@
+X caus Y	X	damag	0.9813543252212169
+X caus Y	X	fire	1.6626670481341594
+X caus Y	Y	damag	1.6626670481341594
+X caus Y	Y	fire	0.9813543252212169
+X contribut to Y	X	stress	2.7647455447787554
+X contribut to Y	Y	ill	1.8997481072921507
+X cure Y	X	medicin	2.646962509122372
+X cure Y	Y	diseas	2.646962509122372
+X die of Y	X	cell	2.2414974010142075
+X die of Y	X	virus	1.442989704796436
+X die of Y	Y	cell	1.442989704796436
+X die of Y	Y	virus	2.2414974010142075
+X expos to Y	X	skin	2.7647455447787554
+X expos to Y	Y	sun	1.9538153285624265
+X indic Y	X	symptom	1.9943066899171635
+X indic Y	X	diseas	1.5300010817860656
+X indic Y	Y	symptom	1.5300010817860656
+X indic Y	Y	ill	1.4477629835490935
+X kill Y	X	cell	1.442989704796436
+X kill Y	X	virus	2.1849270495258133
+X kill Y	Y	cell	2.1849270495258133
+X kill Y	Y	virus	1.442989704796436
+X manifest by Y	X	symptom	1.5300010817860656
+X manifest by Y	X	diseas	2.030776369698555
+X manifest by Y	Y	symptom	2.030776369698555
+X manifest by Y	Y	ill	0.9834573754179957
+X produc Y	X	factori	2.5416019934645457
+X produc Y	Y	pollut	2.5416019934645457
+X protect from Y	X	sunscreen	2.5416019934645457
+X protect from Y	Y	sun	1.9538153285624265
+X result in Y	X	damag	1.7632970045642935
+X result in Y	X	fire	0.9813543252212169
+X result in Y	Y	damag	0.9813543252212169
+X result in Y	Y	fire	1.7632970045642935
+X treat Y	X	doctor	2.4462918136602205
+X treat Y	Y	patient	2.4462918136602205

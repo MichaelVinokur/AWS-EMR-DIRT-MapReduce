@@ -1,0 +1,18 @@
+cause	cause/VB/ROOT/0 fire/NN/nsubj/1 damage/NN/dobj/2	12
+result	result/VB/ROOT/0 damage/NN/nsubj/1 in/IN/prep/2 fire/NN/pobj/3	9
+contribute	contribute/VB/ROOT/0 stress/NN/nsubj/1 to/TO/prep/2 illness/NN/pobj/3	8
+indicate	indicate/VB/ROOT/0 symptom/NN/nsubj/1 illness/NN/dobj/2	7
+manifest	manifest/VB/ROOT/0 disease/NN/nsubj/1 by/IN/prep/2 symptom/NN/pobj/3	6
+produce	produce/VB/ROOT/0 factory/NN/nsubj/1 pollution/NN/dobj/2	10
+treat	treat/VB/ROOT/0 doctor/NN/nsubj/1 patient/NN/dobj/2	11
+cure	cure/VB/ROOT/0 medicine/NN/nsubj/1 disease/NN/dobj/2	9
+protect	protect/VB/ROOT/0 sunscreen/NN/nsubj/1 from/IN/prep/2 sun/NN/pobj/3	10
+expose	expose/VB/ROOT/0 skin/NN/nsubj/1 to/TO/prep/2 sun/NN/pobj/3	8
+kill	kill/VB/ROOT/0 virus/NN/nsubj/1 cell/NN/dobj/2	7
+die	die/VB/ROOT/0 cell/NN/nsubj/1 of/IN/prep/2 virus/NN/pobj/3	6
+cause	cause/VB/ROOT/0 damage/NN/nsubj/1 fire/NN/dobj/2	5
+result	result/VB/ROOT/0 fire/NN/nsubj/1 in/IN/prep/2 damage/NN/pobj/3	5
+manifest	manifest/VB/ROOT/0 symptom/NN/nsubj/1 by/IN/prep/2 illness/NN/pobj/3	4
+indicate	indicate/VB/ROOT/0 disease/NN/nsubj/1 symptom/NN/dobj/2	4
+die	die/VB/ROOT/0 virus/NN/nsubj/1 of/IN/prep/2 cell/NN/pobj/3	3
+kill	kill/VB/ROOT/0 cell/NN/nsubj/1 virus/NN/dobj/2	3

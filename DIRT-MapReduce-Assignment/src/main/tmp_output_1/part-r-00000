@@ -1,0 +1,84 @@
+*	X	cell	9
+*	X	damag	14
+*	X	diseas	10
+*	X	doctor	11
+*	X	factori	10
+*	X	fire	17
+*	X	medicin	9
+*	X	skin	8
+*	X	stress	8
+*	X	sunscreen	10
+*	X	symptom	11
+*	X	virus	10
+*	Y	cell	10
+*	Y	damag	17
+*	Y	diseas	9
+*	Y	fire	14
+*	Y	ill	19
+*	Y	patient	11
+*	Y	pollut	10
+*	Y	sun	18
+*	Y	symptom	10
+*	Y	virus	9
+TOTAL	X	127
+TOTAL	Y	127
+X caus Y	X	*	17
+X caus Y	X	damag	5
+X caus Y	X	fire	12
+X caus Y	Y	*	17
+X caus Y	Y	damag	12
+X caus Y	Y	fire	5
+X contribut to Y	X	*	8
+X contribut to Y	X	stress	8
+X contribut to Y	Y	*	8
+X contribut to Y	Y	ill	8
+X cure Y	X	*	9
+X cure Y	X	medicin	9
+X cure Y	Y	*	9
+X cure Y	Y	diseas	9
+X die of Y	X	*	9
+X die of Y	X	cell	6
+X die of Y	X	virus	3
+X die of Y	Y	*	9
+X die of Y	Y	cell	3
+X die of Y	Y	virus	6
+X expos to Y	X	*	8
+X expos to Y	X	skin	8
+X expos to Y	Y	*	8
+X expos to Y	Y	sun	8
+X indic Y	X	*	11
+X indic Y	X	diseas	4
+X indic Y	X	symptom	7
+X indic Y	Y	*	11
+X indic Y	Y	ill	7
+X indic Y	Y	symptom	4
+X kill Y	X	*	10
+X kill Y	X	cell	3
+X kill Y	X	virus	7
+X kill Y	Y	*	10
+X kill Y	Y	cell	7
+X kill Y	Y	virus	3
+X manifest by Y	X	*	10
+X manifest by Y	X	diseas	6
+X manifest by Y	X	symptom	4
+X manifest by Y	Y	*	10
+X manifest by Y	Y	ill	4
+X manifest by Y	Y	symptom	6
+X produc Y	X	*	10
+X produc Y	X	factori	10
+X produc Y	Y	*	10
+X produc Y	Y	pollut	10
+X protect from Y	X	*	10
+X protect from Y	X	sunscreen	10
+X protect from Y	Y	*	10
+X protect from Y	Y	sun	10
+X result in Y	X	*	14
+X result in Y	X	damag	9
+X result in Y	X	fire	5
+X result in Y	Y	*	14
+X result in Y	Y	damag	5
+X result in Y	Y	fire	9
+X treat Y	X	*	11
+X treat Y	X	doctor	11
+X treat Y	Y	*	11
+X treat Y	Y	patient	11
