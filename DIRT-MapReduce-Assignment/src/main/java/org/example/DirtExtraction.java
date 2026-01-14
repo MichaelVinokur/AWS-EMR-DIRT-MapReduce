@@ -1,21 +1,19 @@
 package org.example;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FSDataInputStream;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.*;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.Mapper;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.mapreduce.lib.input.MultipleInputs;
+import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.tartarus.snowball.ext.EnglishStemmer;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URI;
 import java.util.*;
 
@@ -740,7 +738,7 @@ public class DirtExtraction {
         }
     }
 
-    public static class finalCalculationMapper extends Mapper<LongWritable, Text, Text, Text> {
+    public static class PairSimMapper extends Mapper<LongWritable, Text, Text, Text> {
         private final Text outK = new Text();
         private final Text outV = new Text();
 
@@ -803,47 +801,266 @@ public class DirtExtraction {
     }
 
     public static void main(String[] args) throws Exception {
-        if (args.length < 2) {
-            System.err.println("Usage: DirtExtraction <input path> <output path>");
+        if (args.length < 4) {
+            System.err.println("Usage: DirtPipeline <job1_input> <positive_preds> <negative_preds> <base_output_dir>");
             System.exit(-1);
         }
-        System.setProperty("hadoop.home.dir", "C:/src/hadoop/hadoop-3.3.5/winutils-master/hadoop-3.3.5");
+
+        String job1Input = args[0];
+        String posPreds  = args[1];
+        String negPreds  = args[2];
+        String baseOut   = args[3];
+
+        System.setProperty("hadoop.home.dir",
+                "C:/src/hadoop/hadoop-3.3.5/winutils-master/hadoop-3.3.5");
+
         Configuration conf = new Configuration();
-        String tmpDir = "C:/src/DIRT-MapReduce-Assignment/DIRT-MapReduce-Assignment/src/main/hadoop_tmp";
-        conf.set("hadoop.tmp.dir", tmpDir);
-        conf.set("mapreduce.jobtracker.staging.root.dir", tmpDir + "/staging");
-        conf.set("mapreduce.cluster.local.dir", tmpDir + "/local");
         conf.set("mapreduce.framework.name", "local");
         conf.set("fs.defaultFS", "file:///");
-        conf.set("fs.file.impl", "org.apache.hadoop.fs.LocalFileSystem");
-        conf.set("mapreduce.jobtracker.address", "local");
-        System.out.println("EXISTS=" + new java.io.File(args[0]).exists());
-        System.out.println("SIZE=" + new java.io.File(args[0]).length());
-        Job job = Job.getInstance(conf, "DIRT Extraction Job");
-        job.addCacheFile(new Path("file:///C://src//DIRT-MapReduce-Assignment//DIRT-MapReduce-Assignment//src//main//globals.txt").toUri());
-        job.setJarByClass(DirtExtraction.class);
-        job.setMapperClass(DirtMapper.class);
-        job.setReducerClass(DirtReducer.class);
 
-        job.setOutputKeyClass(Text.class);
-        job.setOutputValueClass(Text.class);
+        FileSystem fs = FileSystem.get(conf);
 
-        FileInputFormat.addInputPath(job, new Path(args[0]));
-        FileOutputFormat.setOutputPath(job, new Path(args[1]));
-        job.setInputFormatClass(org.apache.hadoop.mapreduce.lib.input.TextInputFormat.class);
-        System.out.println("INPUT=" + args[0]);
-        System.out.println("OUTPUT=" + args[1]);
+        Path outJob1      = new Path(baseOut, "job1");
+        Path globalsFile  = new Path(baseOut, "globals.txt");
+        Path outJob2      = new Path(baseOut, "job2");
+        Path outJob3      = new Path(baseOut, "job3");
+        Path outJob4      = new Path(baseOut, "job4");
+        Path outStrength  = new Path(baseOut, "strength");
+        Path outJob5A     = new Path(baseOut, "job5A");
+        Path outJob5B     = new Path(baseOut, "job5B");
+        Path outFinal     = new Path(baseOut, "final");
 
-        try {
-            boolean ok = job.waitForCompletion(true);
-            System.out.println("MAP_CALLED=" + job.getCounters()
-                    .findCounter("DEBUG","MAP_CALLED").getValue());
-            if (!ok) throw new RuntimeException("Job failed");
-        } catch (Exception e) {
-            e.printStackTrace();   // <- THIS is the point
-            throw e;
+        // Clean old outputs
+        deleteIfExists(fs, outJob1);
+        deleteIfExists(fs, globalsFile);
+        deleteIfExists(fs, outJob2);
+        deleteIfExists(fs, outJob3);
+        deleteIfExists(fs, outJob4);
+        deleteIfExists(fs, outStrength);
+        deleteIfExists(fs, outJob5A);
+        deleteIfExists(fs, outJob5B);
+        deleteIfExists(fs, outFinal);
+
+        // --------------------
+        // JOB 1: extraction + counts
+        // --------------------
+        {
+            Job job = Job.getInstance(conf, "Job1 - Extract paths + counts");
+            job.setJarByClass(DirtExtraction.class);
+
+            job.setMapperClass(DirtMapper.class);
+            job.setReducerClass(DirtReducer.class);
+
+            job.setMapOutputKeyClass(Text.class);
+            job.setMapOutputValueClass(Text.class);
+            job.setOutputKeyClass(Text.class);
+            job.setOutputValueClass(Text.class);
+
+            FileInputFormat.addInputPath(job, new Path(job1Input));
+            FileOutputFormat.setOutputPath(job, outJob1);
+
+            if (!job.waitForCompletion(true)) throw new RuntimeException("Job1 failed");
+        }
+
+        // --------------------
+        // Extract globals.txt from Job1 output (lines starting with "*" or "TOTAL")
+        // --------------------
+        extractGlobals(fs, outJob1, globalsFile);
+
+        // --------------------
+        // JOB 2: MI computation (Formula 1)
+        // input: Job1 output, cache: globals.txt, output: job2
+        // --------------------
+        {
+            Job job = Job.getInstance(conf, "Job2 - MI(p,slot,w)");
+            job.setJarByClass(DirtExtraction.class);
+
+            job.setMapperClass(MiMapper.class);
+            job.setReducerClass(MiReducer.class);
+
+            job.setMapOutputKeyClass(Text.class);
+            job.setMapOutputValueClass(Text.class);
+            job.setOutputKeyClass(Text.class);
+            job.setOutputValueClass(Text.class);
+
+            job.addCacheFile(globalsFile.toUri());
+
+            FileInputFormat.addInputPath(job, outJob1);
+            FileOutputFormat.setOutputPath(job, outJob2);
+
+            if (!job.waitForCompletion(true)) throw new RuntimeException("Job2 failed");
+        }
+
+        // --------------------
+        // JOB 3: shared-word contributions for test pairs
+        // input: Job2 output, cache: positive+negative, output: job3
+        // --------------------
+        {
+            Job job = Job.getInstance(conf, "Job3 - shared filler contributions");
+            job.setJarByClass(DirtExtraction.class);
+
+            job.setMapperClass(SimMapper.class);
+            job.setReducerClass(SimReducer.class);
+
+            job.setMapOutputKeyClass(Text.class);
+            job.setMapOutputValueClass(Text.class);
+            job.setOutputKeyClass(Text.class);
+            job.setOutputValueClass(Text.class);
+
+            job.addCacheFile(new URI(posPreds));
+            job.addCacheFile(new URI(negPreds));
+
+            FileInputFormat.addInputPath(job, outJob2);
+            FileOutputFormat.setOutputPath(job, outJob3);
+
+            if (!job.waitForCompletion(true)) throw new RuntimeException("Job3 failed");
+        }
+
+        // --------------------
+        // JOB 4: sum contributions (I(p1,p2,slot))
+        // input: Job3 output, output: job4
+        // --------------------
+        {
+            Job job = Job.getInstance(conf, "Job4 - sum intersections");
+            job.setJarByClass(DirtExtraction.class);
+
+            job.setMapperClass(IntersectionSumMapper.class);
+            job.setReducerClass(IntersectionSumReducer.class);
+
+            job.setMapOutputKeyClass(Text.class);
+            job.setMapOutputValueClass(Text.class);
+            job.setOutputKeyClass(Text.class);
+            job.setOutputValueClass(Text.class);
+
+            FileInputFormat.addInputPath(job, outJob3);
+            FileOutputFormat.setOutputPath(job, outJob4);
+
+            if (!job.waitForCompletion(true)) throw new RuntimeException("Job4 failed");
+        }
+
+        // --------------------
+        // PathStrength: S(p,slot) = sum_w MI(p,slot,w)
+        // input: Job2 output, output: strength
+        // --------------------
+        {
+            Job job = Job.getInstance(conf, "PathStrength - sum MI per (p,slot)");
+            job.setJarByClass(DirtExtraction.class);
+
+            job.setMapperClass(PathStrengthMapper.class);
+            job.setReducerClass(PathStrengthReducer.class);
+
+            job.setMapOutputKeyClass(Text.class);
+            job.setMapOutputValueClass(Text.class);
+            job.setOutputKeyClass(Text.class);
+            job.setOutputValueClass(Text.class);
+
+            FileInputFormat.addInputPath(job, outJob2);
+            FileOutputFormat.setOutputPath(job, outStrength);
+
+            if (!job.waitForCompletion(true)) throw new RuntimeException("PathStrength failed");
+        }
+
+        // --------------------
+        // JOB 5A: join I with S(p,slot)
+        // inputs: job4 + strength, output: job5A
+        // --------------------
+        {
+            Job job = Job.getInstance(conf, "Job5A - join I with strength");
+            job.setJarByClass(DirtExtraction.class);
+
+            job.setReducerClass(jobAReducer.class);
+
+            job.setMapOutputKeyClass(Text.class);
+            job.setMapOutputValueClass(Text.class);
+            job.setOutputKeyClass(Text.class);
+            job.setOutputValueClass(Text.class);
+
+            MultipleInputs.addInputPath(job, outJob4, TextInputFormat.class, jobAIntersectionMapper.class);
+            MultipleInputs.addInputPath(job, outStrength, TextInputFormat.class, jobAStrengthMapper.class);
+
+            FileOutputFormat.setOutputPath(job, outJob5A);
+
+            if (!job.waitForCompletion(true)) throw new RuntimeException("Job5A failed");
+        }
+
+        // --------------------
+        // JOB 5B: sim(p1,p2,slot) = I / (S1+S2)  (Formula 2)
+        // input: job5A, output: job5B
+        // --------------------
+        {
+            Job job = Job.getInstance(conf, "Job5B - compute sim slot");
+            job.setJarByClass(DirtExtraction.class);
+
+            job.setMapperClass(SimSlotMapper.class);
+            job.setReducerClass(SimSlotReducer.class);
+
+            job.setMapOutputKeyClass(Text.class);
+            job.setMapOutputValueClass(Text.class);
+            job.setOutputKeyClass(Text.class);
+            job.setOutputValueClass(Text.class);
+
+            FileInputFormat.addInputPath(job, outJob5A);
+            FileOutputFormat.setOutputPath(job, outJob5B);
+
+            if (!job.waitForCompletion(true)) throw new RuntimeException("Job5B failed");
+        }
+
+        // --------------------
+        // JOB 6: final S(p1,p2)=sqrt(simX*simY)  (Formula 3)
+        // input: job5B, output: final
+        // --------------------
+        {
+            Job job = Job.getInstance(conf, "Job6 - final similarity");
+            job.setJarByClass(DirtExtraction.class);
+
+            job.setMapperClass(PairSimMapper.class);
+            job.setReducerClass(finalCalculationReducer.class);
+
+            job.setMapOutputKeyClass(Text.class);
+            job.setMapOutputValueClass(Text.class);
+            job.setOutputKeyClass(Text.class);
+            job.setOutputValueClass(Text.class);
+
+            FileInputFormat.addInputPath(job, outJob5B);
+            FileOutputFormat.setOutputPath(job, outFinal);
+
+            if (!job.waitForCompletion(true)) throw new RuntimeException("Job6 failed");
+        }
+
+        System.out.println("DONE. Final output in: " + outFinal.toString());
+    }
+
+// ---------- helpers ----------
+
+    private static void deleteIfExists(FileSystem fs, Path p) throws IOException {
+        if (fs.exists(p)) fs.delete(p, true);
+    }
+
+    private static void extractGlobals(FileSystem fs, Path job1OutDir, Path globalsOutFile) throws IOException {
+        // write only lines that start with "*\t" or "TOTAL\t"
+        try (FSDataOutputStream out = fs.create(globalsOutFile, true);
+             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out))) {
+
+            FileStatus[] files = fs.listStatus(job1OutDir);
+            for (FileStatus st : files) {
+                String name = st.getPath().getName();
+                if (!name.startsWith("part-")) continue;
+
+                try (FSDataInputStream in = fs.open(st.getPath());
+                     BufferedReader br = new BufferedReader(new InputStreamReader(in))) {
+
+                    String line;
+                    while ((line = br.readLine()) != null) {
+                        if (line.startsWith("*\t") || line.startsWith("TOTAL\t")) {
+                            bw.write(line);
+                            bw.newLine();
+                        }
+                    }
+                }
+            }
         }
     }
+
 }
 
 

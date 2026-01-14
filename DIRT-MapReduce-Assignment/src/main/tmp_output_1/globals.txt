@@ -1,0 +1,24 @@
+*	X	cell	9
+*	X	damag	14
+*	X	diseas	10
+*	X	doctor	11
+*	X	factori	10
+*	X	fire	17
+*	X	medicin	9
+*	X	skin	8
+*	X	stress	8
+*	X	sunscreen	10
+*	X	symptom	11
+*	X	virus	10
+*	Y	cell	10
+*	Y	damag	17
+*	Y	diseas	9
+*	Y	fire	14
+*	Y	ill	19
+*	Y	patient	11
+*	Y	pollut	10
+*	Y	sun	18
+*	Y	symptom	10
+*	Y	virus	9
+TOTAL	X	127
+TOTAL	Y	127
