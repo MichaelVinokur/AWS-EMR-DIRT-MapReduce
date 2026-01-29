@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="9396f993-586b-4fc3-8ebe-444136ea8ddd" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/DIRT-MapReduce-Assignment/src/main/java/org/example/App.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DIRT-MapReduce-Assignment/.idea/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DIRT-MapReduce-Assignment/.idea/encodings.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DIRT-MapReduce-Assignment/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DIRT-MapReduce-Assignment/.idea/uiDesigner.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DIRT-MapReduce-Assignment/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DIRT-MapReduce-Assignment/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/DIRT-MapReduce-Assignment/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DIRT-MapReduce-Assignment/src/main/java/org/example/DirtExtraction.java" beforeDir="false" afterPath="$PROJECT_DIR$/DIRT-MapReduce-Assignment/src/main/java/org/example/DirtExtraction.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/DIRT-MapReduce-Assignment/src/main/java/org/example/MiComputation.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/DIRT-MapReduce-Assignment/src/main/java/org/example/SimilarityComputation.java" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 7
+}</component>
+  <component name="ProjectId" id="38KtEavxz5RE9QnytaMWUAtNgZm" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.DIRT.executor&quot;: &quot;Run&quot;,
+    &quot;Maven.DIRT-MapReduce-Assignment [clean].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.DIRT-MapReduce-Assignment [compile].executor&quot;: &quot;Run&quot;,
+    &quot;Maven.DIRT-MapReduce-Assignment [package].executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/DIRT-MapReduce-Assignment/DIRT-MapReduce-Assignment&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RunManager">
+    <configuration name="DIRT" type="Application" factoryName="Application">
+      <envs>
+        <env name="AWS_ACCESS_KEY_ID" value="ASIA5FTY6HQ327GXTMA2" />
+        <env name="AWS_SECRET_ACCESS_KEY" value="SQPAen/CtLA+JVbbDTuIYCFXZqBCK4I+7Jd2mpQV" />
+        <env name="AWS_SESSION_TOKEN" value="IQoJb3JpZ2luX2VjEM3//////////wEaCXVzLXdlc3QtMiJIMEYCIQCZa0Q2sK8lHewItKP7xPe7PCoqYWJU2DttEYCKie/UoQIhAOPniXRfKrjhn6OyhIGUqAQ8S842vv0ZTXqkm9NvEC2KKroCCJb//////////wEQABoMOTA1NDE3OTk3MzY3IgzEv6mn9tF0m6KzOXIqjgItnHabPTKQ8gasNrt3C/FVlS+yKB457WnbLUNc/C6pmfjMRCLQFQEJaWbNHcf2xim/YIAazxiYX3uuTdtdClwtshe/Euj+DozTkPORkH5s3AxsiEpglc7dcIWk12Q1zbLtEdDdYEwlZSoKySffBz5VXfBWIBhEecVLA4L7MMhehAzWRYL51rvS3B5BCcWo2ZT3ydXkR7wxnIe03kfBzHVkD1JzJfp0sWiuAK1YZA4cXUruWXKBkR2HZ8fGhCgFSyuf5bU8wSN454eS83OlcTNk458ALCrxgU572MAJx3ZXsyd4/bfC8quNKnnSQDHXtARA4avA8leUliUpXTlT1/zxKtTcxAsq9ckIJccI6Zgw9dW4ywY6nAFqYkdzppLvBQP5kVcJqx/L+wS4GfQR3ZnSzYCVArYs59jjwnl4pSmriPOGP1U6mkWqMGT2zYZx8qMPQmMK+9OWFZ3jZYV6VsB12PzrVbajXaq11lBgqfOZwVCT/+Gy+eFvnD59F+iU8iicAcEBe7vdV06MVAkCeS01nKjItQ5GYJD0f8Z0D94XpFfHVWzcPX5BaUgXDUGO4wLdfU4=" />
+      </envs>
+      <option name="MAIN_CLASS_NAME" value="org.example.App" />
+      <module name="DIRT-MapReduce-Assignment" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-fdfe4dae3a2d-intellij.indexing.shared.core-IU-243.22562.218" />
+        <option value="bundled-js-predefined-d6986cc7102b-deb605915726-JavaScript-IU-243.22562.218" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="9396f993-586b-4fc3-8ebe-444136ea8ddd" name="Changes" comment="" />
+      <created>1768559980121</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1768559980121</updated>
+      <workItem from="1768559981231" duration="6984000" />
+      <workItem from="1768745998728" duration="820000" />
+      <workItem from="1768773580643" duration="843000" />
+      <workItem from="1768774468554" duration="13524000" />
+      <workItem from="1768866465232" duration="380000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>

@@ -11,7 +11,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.MultipleInputs;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
-import org.tartarus.snowball.ext.EnglishStemmer;
+import org.tartarus.snowball.ext.englishStemmer;
 
 import java.io.*;
 import java.net.URI;
@@ -19,10 +19,9 @@ import java.util.*;
 
 
 public class DirtExtraction {
-//SECTION: job1
-    //cease   cease/VB/ccomp/0 for/IN/prep/1 an/DT/det/4 instant/NN/pobj/2    56	1834,2	1835,1	1856,1	1863,1	1871,1	1872,1	1874,1	1875,3	1880,2	1883,2	1889,1	1904,7	1905,2	1915,5	1918,1	1961,1	1963,5	1973,2	1975,1	1977,1	1981,2	1987,2	1988,1	1989,1	1991,1	1996,5	2000,1	2008,2
-    public static class DirtMapper extends Mapper<LongWritable, Text, Text, Text> {
-        private final EnglishStemmer stemmer = new EnglishStemmer();
+    //SECTION: job1
+     public static class DirtMapper extends Mapper<LongWritable, Text, Text, Text> {
+        private final englishStemmer stemmer = new englishStemmer();
         private final Text outKey = new Text();
         private final Text outValue = new Text();
 
@@ -45,11 +44,11 @@ public class DirtExtraction {
             catch (Exception e) { return; }
 
             boolean headIsVerb = false;
-            String prep = null;      // e.g. "for" - IN
-            String xNoun = null; // subject = נושא
-            String yNoun = null; // object = מושא
+            String prep = null;
+            String xNoun = null;
+            String yNoun = null;
 
-            String[] syntacticNgram = tokens[1].split("\\s+"); // cease/VB/ccomp/0  for/IN/prep/1  some/DT/det/4  time/NN/pobj/2
+            String[] syntacticNgram = tokens[1].split("\\s+");
             for(String s: syntacticNgram){
                 String [] sBreak = s.split("/");
                 if (sBreak.length < 2) continue;
@@ -88,7 +87,6 @@ public class DirtExtraction {
                     : "X " + stemmedHead + " Y";
 
             if (xNoun == null) {
-                // If you insist on keeping Y-only cases, we still use the same template string
                 emitCounts(context, pXY, "Y", yNoun, freq);
             } else {
                 emitCounts(context, pXY, "X", xNoun, freq);
@@ -98,7 +96,7 @@ public class DirtExtraction {
 
         private String applyStemming(String word) {
             String lower = word.toLowerCase().trim();
-            if (auxiliaryVerbs.contains(lower)) return null; // סינון פעלים עוזרים
+            if (auxiliaryVerbs.contains(lower)) return null;
 
             stemmer.setCurrent(lower);
             if (stemmer.stem()) {
@@ -127,7 +125,6 @@ public class DirtExtraction {
         }
     }
 
-    // --- 2. ה-REDUCER: סכימת מופעים לחישוב MI בהמשך ---
     public static class DirtReducer extends Reducer<Text, Text, Text, Text> {
         @Override
         protected void reduce(Text key, Iterable<Text> values, Context context)
@@ -158,14 +155,14 @@ public class DirtExtraction {
             if (parts.length != 4) return;
 
             String p = parts[0];
-            if (p.equals("*") || p.equals("TOTAL")) return; // globals -> not sent to reducer
+            if (p.equals("*") || p.equals("TOTAL")) return;
 
             String slot = parts[1];
             String w = parts[2];
             String cnt = parts[3];
 
-            outK.set(p + "\t" + slot);      // group by (p,slot)
-            outV.set(w + "\t" + cnt);       // (wordOrStar, count)
+            outK.set(p + "\t" + slot);
+            outV.set(w + "\t" + cnt);
             context.write(outK, outV);
         }
     }
@@ -183,10 +180,11 @@ public class DirtExtraction {
             if (cacheFiles == null) return;
 
             Configuration conf = context.getConfiguration();
-            FileSystem fs = FileSystem.get(conf);
 
             for (URI uri : cacheFiles) {
                 Path path = new Path(uri.toString());
+                FileSystem fs = path.getFileSystem(conf);
+
                 try (FSDataInputStream in = fs.open(path);
                      BufferedReader br = new BufferedReader(new InputStreamReader(in))) {
 
@@ -196,9 +194,6 @@ public class DirtExtraction {
                         if (line.isEmpty()) continue;
 
                         String[] parts = line.split("\t");
-                        // globals.txt should contain ONLY:
-                        // "*\tSLOT\tWORD\tCOUNT"
-                        // "TOTAL\tSLOT\tCOUNT"
                         if (parts.length == 4 && parts[0].equals("*")) {
                             String slot = parts[1];
                             String w = parts[2];
@@ -218,7 +213,7 @@ public class DirtExtraction {
         protected void reduce(Text key, Iterable<Text> values, Context context)
                 throws IOException, InterruptedException {
 
-            // key = "p\tSLOT"
+
             String[] ks = key.toString().split("\t");
             if (ks.length != 2) return;
             String p = ks[0];
@@ -254,6 +249,8 @@ public class DirtExtraction {
 
                 double mi = Math.log(((double) c_psw_cnt * (double) N_s) /
                         ((double) c_ps_all * (double) c_star));
+
+                if (mi < 0) mi = 0;
 
                 context.write(new Text(p + "\t" + slot + "\t" + w), new Text(Double.toString(mi)));
             }
@@ -311,19 +308,21 @@ public class DirtExtraction {
                 "in","on","at","by","for","from","with","to","into","over","under","of","as",
                 "during","after","before","through","via","against","upon"
         ));
-        private final EnglishStemmer stemmer = new EnglishStemmer();
+        private final englishStemmer stemmer = new englishStemmer();
 
         @Override
         protected void setup(Mapper.Context context) throws IOException {
             URI[] cacheFiles = context.getCacheFiles();
             if (cacheFiles == null) return;
 
-            FileSystem fs = FileSystem.get(context.getConfiguration());
+            Configuration conf = context.getConfiguration();
 
             for (URI uri : cacheFiles) {
                 Path path = new Path(uri.toString());
-                try (BufferedReader br =
-                             new BufferedReader(new InputStreamReader(fs.open(path)))) {
+
+                FileSystem fs = path.getFileSystem(conf);
+
+                try (BufferedReader br = new BufferedReader(new InputStreamReader(fs.open(path)))) {
 
                     String line;
                     while ((line = br.readLine()) != null) {
@@ -348,7 +347,7 @@ public class DirtExtraction {
             if (parts.length != 4) return;
 
             String p = parts[0];
-            if (!testPaths.contains(p)) return; //path not in TestPAths
+            if (!testPaths.contains(p)) return;
 
             String slot = parts[1];
             String w = parts[2];
@@ -387,7 +386,7 @@ public class DirtExtraction {
                 if (!PREPS.contains(prep)) return null;
             }
 
-            // Normalize: flip Y...X into X...Y (to match corpus extraction)
+
             boolean flip = leftVar.equals("Y") && rightVar.equals("X");
             String outLeft = flip ? "X" : leftVar;
             String outRight = flip ? "Y" : rightVar;
@@ -409,19 +408,22 @@ public class DirtExtraction {
                 "in","on","at","by","for","from","with","to","into","over","under","of","as",
                 "during","after","before","through","via","against","upon"
         ));
-        private final EnglishStemmer stemmer = new EnglishStemmer();
+        private final englishStemmer stemmer = new englishStemmer();
 
         @Override
         protected void setup(Context context) throws IOException {
-            // Load positive + negative pairs from cache
             URI[] cacheFiles = context.getCacheFiles();
             if (cacheFiles == null) return;
 
-            FileSystem fs = FileSystem.get(context.getConfiguration());
+            Configuration conf = context.getConfiguration();
 
             for (URI uri : cacheFiles) {
+                Path path = new Path(uri.toString());
+
+                FileSystem fs = path.getFileSystem(conf);
+
                 try (BufferedReader br = new BufferedReader(
-                        new InputStreamReader(fs.open(new Path(uri))))) {
+                        new InputStreamReader(fs.open(path)))) {
 
                     String line;
                     while ((line = br.readLine()) != null) {
@@ -455,7 +457,7 @@ public class DirtExtraction {
                 }
             }
 
-            // key is "slot\tw" (from mapper)
+
             String[] kw = key.toString().split("\t", 2);
             if (kw.length != 2) return;
             String slot = kw[0];
@@ -474,8 +476,9 @@ public class DirtExtraction {
                     String pair = (p1.compareTo(p2) <= 0) ? p1 + "\t" + p2 : p2 + "\t" + p1;
                     if (!testPairs.contains(pair)) continue;
 
-                    // shared-word contribution for this (slot,w)
-                    double contrib = mis.get(i) + mis.get(j);   // <-- important double contrib = Math.min(mis.get(i), mis.get(j));
+
+                    double contrib = mis.get(i) + mis.get(j);
+                    if (contrib < 0) contrib = 0;
 
                     outK.set(pair + "\t" + slot);
                     outV.set(Double.toString(contrib));
@@ -506,16 +509,14 @@ public class DirtExtraction {
 
             String verbStem = stem(toks[1]);
 
-            // prep optional
+
             String prep = null;
             if (toks.length == 4) {
                 prep = toks[2].toLowerCase().trim();
                 if (!PREPS.contains(prep)) return null;
             }
 
-            // === IMPORTANT NORMALIZATION ===
-            // Your corpus paths are canonicalized as: X ... Y (X=nsubj, Y=obj/pobj).
-            // So if the template is "Y ... X", flip it to "X ... Y".
+
             boolean flip = leftVar.equals("Y") && rightVar.equals("X");
 
             String outLeft = flip ? "X" : leftVar;
@@ -531,7 +532,6 @@ public class DirtExtraction {
 
 
     //SECTION: job4
-
     public static class IntersectionSumMapper extends Mapper<LongWritable, Text, Text, Text> {
         private final Text outK = new Text();
         private final Text outV = new Text();
@@ -565,7 +565,6 @@ public class DirtExtraction {
     }
 
 //SECTION: job5
-
     public static class jobAIntersectionMapper extends Mapper<LongWritable, Text, Text, Text> {
         private final Text outK = new Text();
         private final Text outV = new Text();
@@ -622,21 +621,17 @@ public class DirtExtraction {
             String p = keyParts[0];
             String slot = keyParts[1];
             Double S = null;
-            // store L/R records temporarily
             List<String[]> pairRecords = new ArrayList<>();
 
             for (Text v : values) {
                 String[] parts = v.toString().split("\t");
                 if (parts[0].equals("S")) {
-                    // S(p,slot)
                     S = Double.parseDouble(parts[1]);
                 } else {
-                    // L or R record
                     if (parts.length == 3) pairRecords.add(parts);
                 }
             }
 
-            // if no strength, we cannot normalize later
             if (S == null) return;
 
             for (String[] rec : pairRecords) {
@@ -670,7 +665,7 @@ public class DirtExtraction {
             if (line.isEmpty()) return;
 
             String[] parts = line.split("\t");
-            // expected: p1 p2 slot side I S
+
             if (parts.length != 6) return;
 
             String p1 = parts[0];
@@ -712,7 +707,7 @@ public class DirtExtraction {
                     continue;
                 }
 
-                // I is the same in both L and R records, so just store it once
+
                 if (I == null) I = iVal;
 
                 if (side.equals("L")) S_left = sVal;
@@ -726,7 +721,7 @@ public class DirtExtraction {
 
             double simSlot = I / denom;
 
-            // key is "p1\tp2\tslot"
+
             String[] kp = key.toString().split("\t", 3);
             if (kp.length != 3) return;
 
@@ -791,11 +786,14 @@ public class DirtExtraction {
                 }
             }
 
-            // Must have both X and Y
+
             if (simX == null || simY == null) return;
 
-            double finalSim = Math.sqrt(simX * simY);
 
+            double product = simX * simY;
+            if (product <= 0) return;
+
+            double finalSim = Math.sqrt(product);
             context.write(key, new Text(Double.toString(finalSim)));
         }
     }
@@ -811,14 +809,8 @@ public class DirtExtraction {
         String negPreds  = args[2];
         String baseOut   = args[3];
 
-        System.setProperty("hadoop.home.dir",
-                "C:/src/hadoop/hadoop-3.3.5/winutils-master/hadoop-3.3.5");
-
         Configuration conf = new Configuration();
-        conf.set("mapreduce.framework.name", "local");
-        conf.set("fs.defaultFS", "file:///");
-
-        FileSystem fs = FileSystem.get(conf);
+        FileSystem fs = FileSystem.get(URI.create(baseOut), conf);
 
         Path outJob1      = new Path(baseOut, "job1");
         Path globalsFile  = new Path(baseOut, "globals.txt");
@@ -830,7 +822,7 @@ public class DirtExtraction {
         Path outJob5B     = new Path(baseOut, "job5B");
         Path outFinal     = new Path(baseOut, "final");
 
-        // Clean old outputs
+
         deleteIfExists(fs, outJob1);
         deleteIfExists(fs, globalsFile);
         deleteIfExists(fs, outJob2);
@@ -841,9 +833,8 @@ public class DirtExtraction {
         deleteIfExists(fs, outJob5B);
         deleteIfExists(fs, outFinal);
 
-        // --------------------
+
         // JOB 1: extraction + counts
-        // --------------------
         {
             Job job = Job.getInstance(conf, "Job1 - Extract paths + counts");
             job.setJarByClass(DirtExtraction.class);
@@ -862,15 +853,13 @@ public class DirtExtraction {
             if (!job.waitForCompletion(true)) throw new RuntimeException("Job1 failed");
         }
 
-        // --------------------
+
         // Extract globals.txt from Job1 output (lines starting with "*" or "TOTAL")
-        // --------------------
         extractGlobals(fs, outJob1, globalsFile);
 
-        // --------------------
+
         // JOB 2: MI computation (Formula 1)
         // input: Job1 output, cache: globals.txt, output: job2
-        // --------------------
         {
             Job job = Job.getInstance(conf, "Job2 - MI(p,slot,w)");
             job.setJarByClass(DirtExtraction.class);
@@ -891,10 +880,9 @@ public class DirtExtraction {
             if (!job.waitForCompletion(true)) throw new RuntimeException("Job2 failed");
         }
 
-        // --------------------
+
         // JOB 3: shared-word contributions for test pairs
         // input: Job2 output, cache: positive+negative, output: job3
-        // --------------------
         {
             Job job = Job.getInstance(conf, "Job3 - shared filler contributions");
             job.setJarByClass(DirtExtraction.class);
@@ -916,10 +904,9 @@ public class DirtExtraction {
             if (!job.waitForCompletion(true)) throw new RuntimeException("Job3 failed");
         }
 
-        // --------------------
+
         // JOB 4: sum contributions (I(p1,p2,slot))
         // input: Job3 output, output: job4
-        // --------------------
         {
             Job job = Job.getInstance(conf, "Job4 - sum intersections");
             job.setJarByClass(DirtExtraction.class);
@@ -938,10 +925,8 @@ public class DirtExtraction {
             if (!job.waitForCompletion(true)) throw new RuntimeException("Job4 failed");
         }
 
-        // --------------------
         // PathStrength: S(p,slot) = sum_w MI(p,slot,w)
         // input: Job2 output, output: strength
-        // --------------------
         {
             Job job = Job.getInstance(conf, "PathStrength - sum MI per (p,slot)");
             job.setJarByClass(DirtExtraction.class);
@@ -960,10 +945,9 @@ public class DirtExtraction {
             if (!job.waitForCompletion(true)) throw new RuntimeException("PathStrength failed");
         }
 
-        // --------------------
+
         // JOB 5A: join I with S(p,slot)
         // inputs: job4 + strength, output: job5A
-        // --------------------
         {
             Job job = Job.getInstance(conf, "Job5A - join I with strength");
             job.setJarByClass(DirtExtraction.class);
@@ -983,10 +967,9 @@ public class DirtExtraction {
             if (!job.waitForCompletion(true)) throw new RuntimeException("Job5A failed");
         }
 
-        // --------------------
+
         // JOB 5B: sim(p1,p2,slot) = I / (S1+S2)  (Formula 2)
         // input: job5A, output: job5B
-        // --------------------
         {
             Job job = Job.getInstance(conf, "Job5B - compute sim slot");
             job.setJarByClass(DirtExtraction.class);
@@ -1005,10 +988,9 @@ public class DirtExtraction {
             if (!job.waitForCompletion(true)) throw new RuntimeException("Job5B failed");
         }
 
-        // --------------------
+
         // JOB 6: final S(p1,p2)=sqrt(simX*simY)  (Formula 3)
         // input: job5B, output: final
-        // --------------------
         {
             Job job = Job.getInstance(conf, "Job6 - final similarity");
             job.setJarByClass(DirtExtraction.class);
@@ -1030,14 +1012,14 @@ public class DirtExtraction {
         System.out.println("DONE. Final output in: " + outFinal.toString());
     }
 
-// ---------- helpers ----------
+    //helpers
 
     private static void deleteIfExists(FileSystem fs, Path p) throws IOException {
         if (fs.exists(p)) fs.delete(p, true);
     }
 
     private static void extractGlobals(FileSystem fs, Path job1OutDir, Path globalsOutFile) throws IOException {
-        // write only lines that start with "*\t" or "TOTAL\t"
+
         try (FSDataOutputStream out = fs.create(globalsOutFile, true);
              BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out))) {
 
